@@ -1,6 +1,7 @@
-# Monte Carlo π Estimation with MPI
 
-This notebook demonstrates how to estimate π (pi) using the Monte Carlo "dart-throwing" method, 
+# Run the Monte Carlo π (MPI) Notebook on **Perlmutter** @ NERSC
+
+This README shows how to run the provided Jupyter notebook **NERSC_mpi_pi_Notebook-5.ipynb** on Perlmutter, and how to execute the MPI portion on compute nodes using Slurm.  This notebook demonstrates how to estimate π (pi) using the Monte Carlo "dart-throwing" method, 
 and how to parallelize the computation using MPI (`mpi4py`) in a High-Performance Computing (HPC) environment.
 
 ## Overview
@@ -14,65 +15,81 @@ The ratio of points inside the quarter circle to the total number of points appr
 - Learn basic MPI concepts: **rank**, **size**, and **reduce** operations.
 - See how to run Python MPI programs in an HPC environment using Slurm.
 
-## Requirements
+---
 
-- Python 3
-- `numpy`
-- `mpi4py`
-- (Optional) `matplotlib` for visualization
+## 0) Prerequisites
 
-Install with:
+- Active NERSC account and an active allocation (`-A <account>`).
+- Familiarity with Perlmutter queues: `debug` (short) or `regular`.
+- The notebook: `NERSC_mpi_pi_Notebook-5.ipynb` is in your working directory on Perlmutter.
+
+---
+
+
+
+##  Interactive: run the notebook in **NERSC Jupyter**
+
+The most convenient way to explore the notebook is through NERSC Jupyter:
+1. Launch **NERSC Jupyter** and choose a **Perlmutter CPU** environment.
+2. In a terminal **inside Jupyter**, activate your venv:
+   ```bash
+   source $SCRATCH/pm-pi-venv/bin/activate
+   module load PrgEnv-gnu cray-mpich
+   ```
+3. Open `NERSC_mpi_pi_Notebook-5.ipynb` and run cells normally.
+   - The serial (non-MPI) cells will run immediately.
+   - For the MPI example, prefer Section **2B**/**3** below to execute via `srun` on a compute node.
+
+> Note: Jupyter kernels run as a single process; true multi-rank MPI execution should be launched with `srun` (below).
+
+
+##  Run on Perlmutter with Slurm
+
+### A) **Interactive** test (CPU)
+
 ```bash
-pip install numpy mpi4py matplotlib
+# Request an interactive node (CPU)
+salloc -N 1 -C cpu -q debug -t 00:10:00 -A <account>
+
+
+# 8 MPI ranks example
+srun -n 8 python pi_mpi.py
 ```
 
-## Structure
+### B) **Batch** job (CPU)
 
-1. **Serial Implementation**  
-   Demonstrates the Monte Carlo method on a single process.
-
-2. **MPI Implementation**  
-   Parallelizes the computation across multiple ranks (processes) using `mpi4py`.
-
-3. **HPC Job Submission**  
-   Example of a Slurm job script to run the MPI version on an HPC cluster.
-
-## Running the Code
-
-### Locally with mpiexec
-```bash
-mpiexec -n 4 python pi_mpi.py
-```
-
-### On an HPC Cluster (Slurm)
-Example `run_pi.slurm` script:
+Create `run_pi.slurm`:
 ```bash
 #!/bin/bash
-#SBATCH -J pi
+#SBATCH -J mpi-pi
+#SBATCH -A <account>
+#SBATCH -C cpu
+#SBATCH -q debug
 #SBATCH -N 1
-#SBATCH -n 8
-#SBATCH -t 00:02:00
+#SBATCH -t 00:05:00
 #SBATCH -o pi-%j.out
 
-module load python  # Load your environment/module as required
+module load PrgEnv-gnu python cray-mpich
+
 srun python pi_mpi.py
 ```
 
-Submit with:
+Submit:
 ```bash
 sbatch run_pi.slurm
 ```
 
-## Key MPI Concepts in This Notebook
+> For longer runs, change `-q debug` to `-q regular` and adjust `-t` appropriately.
 
-- **Rank**: The unique ID of a process in an MPI program.
-- **Size**: Total number of processes in the MPI communicator.
-- **Reduce**: Combines values from all processes to a single result on a designated root process.
+---
 
-## Output Example
-```
-π≈3.141592  (N=4000000, ranks=4)
-```
 
-## License
-This material is for educational purposes as part of an Introduction to HPC Bootcamp.
+## Notes for GPU queues (optional)
+
+This π example is CPU-oriented. If adapting for GPU nodes:
+- Use `-C gpu` and set proper GPU modules/containers. MPI pattern is unchanged.
+- Python+MPI on GPU is typically for orchestrating GPU work per rank (not needed for this simple CPU Monte Carlo demo).
+
+---
+
+**License**: Educational material for an Intro to HPC Bootcamp.
