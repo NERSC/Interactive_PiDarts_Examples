@@ -15,11 +15,6 @@ The ratio of points inside the quarter circle to the total number of points appr
 - Learn basic MPI concepts: **rank**, **size**, and **reduce** operations.
 - See how to run Python MPI programs in an HPC environment using Slurm.
 
-# Run the Monte Carlo π (MPI) Notebook on **Perlmutter** @ NERSC
-
-This README shows how to run the provided Jupyter notebook **NERSC_mpi_pi_Notebook-5.ipynb** on Perlmutter, and how to execute the MPI portion on compute nodes using Slurm.
-
-> TL;DR: build `mpi4py` against Perlmutter's Cray MPICH, then either (A) open the notebook in NERSC Jupyter for walkthrough, or (B) export a small script from the notebook and launch it with `srun`.
 
 ---
 
