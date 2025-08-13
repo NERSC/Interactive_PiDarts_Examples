@@ -50,11 +50,11 @@ The most convenient way to explore the notebook is through NERSC Jupyter:
 
 ```bash
 # Request an interactive node (CPU)
-salloc -N 1 -C cpu -q debug -t 00:10:00 -A <account>
+salloc -N 1 -n 8 -C cpu -q debug -t 00:10:00 -A <account>
 
 
 # 8 MPI ranks example
-srun -n 8 python pi_mpi.py
+srun python pi_mpi.py
 ```
 
 ### B) **Batch** job (CPU)
